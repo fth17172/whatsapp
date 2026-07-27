@@ -10,30 +10,36 @@
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- 1. GİRİŞ EKRANI (Sadece Siz Seçersiniz) -->
+    <!-- 1. GİRİŞ EKRANI -->
     <div id="login-screen" class="w-full max-w-sm bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-700">
-        <h1 class="text-xl font-bold mb-2 text-amber-400">Emirhan ile Mesajlaşma</h1>
+        <h1 class="text-xl font-bold mb-2 text-amber-400">Emirhan İletişim Paneli</h1>
         <p class="text-xs text-slate-400 mb-6">Bu cihazı kim kullanıyor?</p>
         <div class="space-y-3">
-            <button onclick="login('anne')" class="w-full bg-pink-600 hover:bg-pink-700 py-3.5 rounded-xl font-semibold transition">Arzu</button>
-            <button onclick="login('baba')" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-semibold transition">Hasan</button>
-            <button onclick="login('fatih')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl font-semibold transition">Fatih</button>
+            <button onclick="login('anne')" class="w-full bg-pink-600 hover:bg-pink-700 py-3.5 rounded-xl font-semibold transition">Ben Annem</button>
+            <button onclick="login('baba')" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-semibold transition">Ben Babam</button>
+            <button onclick="login('fatih')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl font-semibold transition">Ben Fatih</button>
             <div class="pt-2 border-t border-slate-700">
-                <button onclick="login('emirhan')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-bold transition">Emirhan</button>
+                <button onclick="login('emirhan')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-bold transition">Ben Emirhan</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. MESAJLAŞMA EKRANI (Doğrudan Emirhan Bağlantısı) -->
-    <div id="chat-screen" class="w-full max-w-sm bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col h-[520px] hidden">
+    <!-- 2. MESAJLAŞMA EKRANI -->
+    <div id="chat-screen" class="w-full max-w-sm bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col h-[550px] hidden">
         
-        <!-- Üst Başlık -->
-        <div class="bg-slate-700 p-4 rounded-t-2xl flex justify-between items-center border-b border-slate-600">
-            <div>
-                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Aktif Sohbet</p>
-                <h2 id="chat-target-title" class="font-bold text-base text-amber-400">Emirhan</h2>
+        <!-- Üst Başlık ve Bildirim İzin Butonu -->
+        <div class="bg-slate-700 p-4 rounded-t-2xl border-b border-slate-600">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Aktif Sohbet</p>
+                    <h2 id="chat-target-title" class="font-bold text-base text-amber-400">Emirhan</h2>
+                </div>
+                <span id="status-badge" class="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-semibold">Çevrimdışı</span>
             </div>
-            <span id="status-badge" class="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-semibold">Çevrimdışı</span>
+            <!-- Mobil Bildirim İzni Butonu -->
+            <button id="notif-btn" onclick="enableNotifications()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-xs py-1.5 rounded-lg font-bold transition">
+                🔔 Sesi/Bildirimleri Aktif Et
+            </button>
         </div>
 
         <!-- Mesaj Kutusu -->
@@ -60,8 +66,25 @@
         let conn = null;
         let myRole = "";
 
+        // Service Worker Kaydı (Mobil Bildirim Şartı)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('SW Aktif:', reg))
+                .catch(err => console.log('SW Hata:', err));
+        }
+
+        function enableNotifications() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === "granted") {
+                        document.getElementById("notif-btn").innerText = "✅ Bildirimler Açık";
+                        document.getElementById("notif-btn").classList.replace("bg-indigo-600", "bg-emerald-600");
+                        alert("Bildirim izni verildi! Artık mesaj geldiğinde 'tınnn' yapacak.");
+                    } else {
+                        alert("İzin reddedildi. Telefon ayarlarından tarayıcı bildirimlerini açmalısın.");
+                    }
+                });
+            }
         }
 
         function login(role) {
@@ -76,12 +99,10 @@
                     document.getElementById("chat-target-title").innerText = "Aile Bağlantı Hattı";
                 } else {
                     document.getElementById("chat-target-title").innerText = "Emirhan";
-                    // Sen, Annem veya Babam girdiğinde otomatik Emirhan'a bağlanmaya çalışır
                     connectToEmirhan();
                 }
             });
 
-            // Gelen bağlantıları dinle (Emirhan bağlandığında)
             peer.on('connection', (incomingConn) => {
                 conn = incomingConn;
                 setupConnection();
@@ -102,7 +123,7 @@
 
             conn.on('data', (data) => {
                 appendMessage(data.senderName, data.text, 'incoming');
-                playNotificationSound();
+                triggerMobileNotification(data.senderName, data.text);
             });
 
             conn.on('close', () => {
@@ -141,12 +162,20 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        function playNotificationSound() {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Emirhan İletişim", {
-                    body: "Yeni bir mesaj geldi!",
-                    icon: "https://cdn-icons-png.flaticon.com/512/3059/3059502.png"
-                });
+        function triggerMobileNotification(sender, text) {
+            if (Notification.permission === "granted") {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then((reg) => {
+                        reg.showNotification(`Mesaj: ${sender}`, {
+                            body: text,
+                            icon: "https://cdn-icons-png.flaticon.com/512/3059/3059502.png",
+                            vibrate: [200, 100, 200],
+                            tag: "emirhan-msg"
+                        });
+                    });
+                } else {
+                    new Notification(`Mesaj: ${sender}`, { body: text });
+                }
             }
         }
     </script>
