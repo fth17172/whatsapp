@@ -3,62 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aile İletişim Ağım</title>
+    <title>Aile İletişim</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PeerJS P2P Ses Kütüphanesi -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
     <!-- 1. GİRİŞ EKRANI -->
     <div id="login-screen" class="w-full max-w-sm bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-700">
-        <h1 class="text-xl font-bold mb-2 text-slate-100">Cihaz Sahibi Seçimi</h1>
+        <h1 class="text-xl font-bold mb-2">Cihaz Sahibi Seçimi</h1>
         <p class="text-xs text-slate-400 mb-6">Lütfen bu cihazın sahibini seçin</p>
         <div class="space-y-3">
-            <button onclick="login('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-semibold transition active:scale-95 shadow-lg">Ben Kardeşim</button>
-            <button onclick="login('anne')" class="w-full bg-pink-600 hover:bg-pink-700 py-3.5 rounded-xl font-semibold transition active:scale-95 shadow-lg">Ben Annem</button>
-            <button onclick="login('baba')" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-semibold transition active:scale-95 shadow-lg">Ben Babam</button>
-            <button onclick="login('fatih')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl font-semibold transition active:scale-95 shadow-lg">Ben Fatih</button>
+            <button onclick="login('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-semibold transition">Ben Kardeşim</button>
+            <button onclick="login('anne')" class="w-full bg-pink-600 hover:bg-pink-700 py-3.5 rounded-xl font-semibold transition">Ben Annem</button>
+            <button onclick="login('baba')" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-semibold transition">Ben Babam</button>
+            <button onclick="login('fatih')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl font-semibold transition">Ben Fatih</button>
         </div>
     </div>
 
-    <!-- 2. KONTROL PANELİ -->
+    <!-- 2. KONTROL PANELİ (Kişi Seçimi) -->
     <div id="app-screen" class="w-full max-w-sm bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 hidden">
-        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
             <div>
-                <p class="text-xs text-slate-400">Aktif Profil</p>
+                <p class="text-xs text-slate-400">Profil</p>
                 <h2 id="user-title" class="text-lg font-bold text-emerald-400"></h2>
             </div>
-            <div class="flex items-center space-x-2">
-                <span class="text-xs text-emerald-400 font-medium">Çevrimiçi</span>
-                <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
-            </div>
+            <span class="text-xs text-emerald-400 font-medium">Bağlı</span>
         </div>
-
-        <!-- Bildirim İzni Butonu -->
-        <div id="notif-perm-box" class="mb-6 bg-slate-700/50 p-3 rounded-xl border border-slate-600 hidden">
-            <p class="text-xs text-slate-300 mb-2">Kapalıyken bildirim ("tınnn") almak için izin ver:</p>
-            <button onclick="requestNotificationPermission()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-lg text-xs font-bold transition">Bildirim Sesi İznini Aç</button>
-        </div>
-
-        <div id="contact-zone">
-            <!-- Kişiler Rol Bazlı Buraya Yüklenecek -->
-        </div>
+        <div id="contact-zone"></div>
     </div>
 
-    <!-- 3. ARAMA VE SES EKRANI -->
-    <div id="call-screen" class="fixed inset-0 bg-slate-950/95 flex flex-col items-center justify-center hidden z-50 p-4">
-        <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6 animate-bounce border border-emerald-500/40">
-            <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+    <!-- 3. MESAJLAŞMA EKRANI -->
+    <div id="chat-screen" class="w-full max-w-sm bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col h-[500px] hidden">
+        <div class="bg-slate-700 p-4 rounded-t-2xl flex justify-between items-center">
+            <span id="chat-with-title" class="font-bold"></span>
+            <button onclick="backToContacts()" class="text-xs bg-slate-600 px-3 py-1 rounded">Geri</button>
         </div>
-        <p id="call-status" class="text-xl font-semibold mb-8 text-center">Bağlanıyor...</p>
-        <button onclick="endCall()" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-bold shadow-xl transition active:scale-95">Aramayı Kapat</button>
-        <audio id="remote-audio" autoplay></audio>
+        <div id="messages-box" class="flex-1 p-4 overflow-y-auto space-y-2 flex flex-col"></div>
+        <div class="p-3 bg-slate-700 rounded-b-2xl flex gap-2">
+            <input id="message-input" type="text" placeholder="Mesaj yazın..." class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none">
+            <button onclick="sendMessage()" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold">Gönder</button>
+        </div>
     </div>
 
     <script>
-        // Sabit PeerJS Kimlikleri
         const ID_MAP = {
             kardes: "aile-kardes-id-99",
             anne: "aile-anne-id-99",
@@ -67,14 +56,12 @@
         };
 
         let peer = null;
-        let activeCall = null;
+        let conn = null;
         let myRole = "";
+        let activeTargetRole = "";
 
-        // Service Worker Kaydı (Bildirim Sesi ve Arka Plan İçin Şart)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('Service Worker Kayıt Edildi:', reg))
-                .catch(err => console.log('SW Hata:', err));
+            navigator.serviceWorker.register('/sw.js');
         }
 
         function login(role) {
@@ -83,41 +70,16 @@
             document.getElementById("app-screen").classList.remove("hidden");
             document.getElementById("user-title").innerText = role.toUpperCase();
 
-            // P2P Sunucusuna Bağlantı
             peer = new Peer(ID_MAP[role]);
 
-            // Gelen Aramayı Yakalama
-            peer.on('call', async (call) => {
-                if (confirm("Gelen Sesli Arama Var! Açmak istiyor musun?")) {
-                    try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        call.answer(stream);
-                        handleCall(call);
-                    } catch (e) {
-                        alert("Mikrofon izni verilmedi!");
-                    }
-                }
+            // Gelen mesaj bağlantılarını dinle
+            peer.on('connection', (incomingConn) => {
+                conn = incomingConn;
+                setupConnection();
+                openChatScreen(incomingConn.peer);
             });
 
-            checkNotificationPermission();
             renderDashboard();
-        }
-
-        function checkNotificationPermission() {
-            if ("Notification" in window && Notification.permission !== "granted") {
-                document.getElementById("notif-perm-box").classList.remove("hidden");
-            }
-        }
-
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        document.getElementById("notif-perm-box").classList.add("hidden");
-                        alert("Bildirim sesleri aktif edildi!");
-                    }
-                });
-            }
         }
 
         function renderDashboard() {
@@ -125,68 +87,87 @@
             container.innerHTML = "";
 
             if (myRole === "kardes") {
-                // Kardeşin Ekranı: Herkesi görür ve arar
                 container.innerHTML = `
-                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">Aranacak Kişiler</p>
-                    <div class="space-y-3">
-                        <button onclick="startCall('anne')" class="w-full flex justify-between items-center bg-slate-700 p-4 rounded-xl font-medium hover:bg-slate-600 transition">
-                            <span>Annem</span> <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold">Ara</span>
-                        </button>
-                        <button onclick="startCall('baba')" class="w-full flex justify-between items-center bg-slate-700 p-4 rounded-xl font-medium hover:bg-slate-600 transition">
-                            <span>Babam</span> <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold">Ara</span>
-                        </button>
-                        <button onclick="startCall('fatih')" class="w-full flex justify-between items-center bg-slate-700 p-4 rounded-xl font-medium hover:bg-slate-600 transition">
-                            <span>Fatih</span> <span class="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg font-bold">Ara</span>
-                        </button>
+                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">Sohbet Başlat</p>
+                    <div class="space-y-2">
+                        <button onclick="startChat('anne')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Annem ile Mesajlaş</button>
+                        <button onclick="startChat('baba')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Babam ile Mesajlaş</button>
+                        <button onclick="startChat('fatih')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Fatih ile Mesajlaş</button>
                     </div>
                 `;
             } else {
-                // Anne, Baba ve Fatih Ekranı: Sadece Kardeşi Arar
                 container.innerHTML = `
-                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">Hızlı Bağlantı</p>
-                    <button onclick="startCall('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 p-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition shadow-lg active:scale-95">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                        <span>Kardeşimi Ara</span>
-                    </button>
+                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">İletişim</p>
+                    <button onclick="startChat('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 p-4 rounded-xl font-bold">Kardeşime Mesaj At</button>
                 `;
             }
         }
 
-        async function startCall(targetRole) {
-            document.getElementById("call-screen").classList.remove("hidden");
-            document.getElementById("call-status").innerText = targetRole.toUpperCase() + " Aranıyor...";
+        function startChat(targetRole) {
+            activeTargetRole = targetRole;
+            conn = peer.connect(ID_MAP[targetRole]);
+            setupConnection();
+            openChatScreen(ID_MAP[targetRole]);
+        }
 
-            // Arka planda bildirim sesini tetikleme (Push Trigger)
-            triggerPushNotification(targetRole);
+        function setupConnection() {
+            conn.on('open', () => {
+                console.log("Bağlantı kuruldu.");
+            });
 
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const call = peer.call(ID_MAP[targetRole], stream);
-                handleCall(call);
-            } catch (err) {
-                alert("Mikrofon izni verin!");
-                endCall();
+            conn.on('data', (data) => {
+                appendMessage(data.sender, data.text, 'incoming');
+                playNotificationSound();
+            });
+        }
+
+        function openChatScreen(peerId) {
+            document.getElementById("app-screen").classList.add("hidden");
+            document.getElementById("chat-screen").classList.remove("hidden");
+            
+            // İsmi bul
+            let foundRole = Object.keys(ID_MAP).find(key => ID_MAP[key] === peerId) || "Sohbet";
+            document.getElementById("chat-with-title").innerText = foundRole.toUpperCase();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("message-input");
+            const text = input.value.trim();
+            if (!text || !conn) return;
+
+            const payload = { sender: myRole, text: text };
+            conn.send(payload);
+            appendMessage("Ben", text, 'outgoing');
+            input.value = "";
+        }
+
+        function appendMessage(sender, text, type) {
+            const box = document.getElementById("messages-box");
+            const msgDiv = document.createElement("div");
+            
+            if (type === 'outgoing') {
+                msgDiv.className = "self-end bg-emerald-600 text-white px-3 py-2 rounded-xl text-sm max-w-[80%]";
+            } else {
+                msgDiv.className = "self-start bg-slate-700 text-white px-3 py-2 rounded-xl text-sm max-w-[80%]";
+            }
+            
+            msgDiv.innerText = text;
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function playNotificationSound() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Yeni Mesaj!", {
+                    body: "Bir mesajınız var.",
+                    icon: "https://cdn-icons-png.flaticon.com/512/3059/3059502.png"
+                });
             }
         }
 
-        function triggerPushNotification(targetRole) {
-            // Push notification servisi bağlandığında burası API isteği atacak
-            console.log(targetRole + " için arka plan bildirim sesi tetiklendi.");
-        }
-
-        function handleCall(call) {
-            activeCall = call;
-            call.on('stream', (remoteStream) => {
-                document.getElementById("remote-audio").srcObject = remoteStream;
-                document.getElementById("call-status").innerText = "Görüşme Devam Ediyor...";
-            });
-            call.on('close', endCall);
-            call.on('error', endCall);
-        }
-
-        function endCall() {
-            if (activeCall) activeCall.close();
-            document.getElementById("call-screen").classList.add("hidden");
+        function backToContacts() {
+            document.getElementById("chat-screen").classList.add("hidden");
+            document.getElementById("app-screen").classList.remove("hidden");
         }
     </script>
 </body>
