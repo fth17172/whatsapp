@@ -1,6 +1,6 @@
 {
-  "name": "Aile İletişim Ağım",
-  "short_name": "Aile",
+  "name": "Whatsapp",
+  "short_name": "Whatsapp",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
