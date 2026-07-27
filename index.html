@@ -3,53 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aile İletişim</title>
+    <title>Emirhan İletişim Hatı</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- 1. GİRİŞ EKRANI -->
+    <!-- 1. GİRİŞ EKRANI (Sadece Siz Seçersiniz) -->
     <div id="login-screen" class="w-full max-w-sm bg-slate-800 p-6 rounded-2xl shadow-2xl text-center border border-slate-700">
-        <h1 class="text-xl font-bold mb-2">Cihaz Sahibi Seçimi</h1>
-        <p class="text-xs text-slate-400 mb-6">Lütfen bu cihazın sahibini seçin</p>
+        <h1 class="text-xl font-bold mb-2 text-amber-400">Emirhan ile Mesajlaşma</h1>
+        <p class="text-xs text-slate-400 mb-6">Bu cihazı kim kullanıyor?</p>
         <div class="space-y-3">
-            <button onclick="login('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-semibold transition">Ben Kardeşim</button>
             <button onclick="login('anne')" class="w-full bg-pink-600 hover:bg-pink-700 py-3.5 rounded-xl font-semibold transition">Ben Annem</button>
             <button onclick="login('baba')" class="w-full bg-blue-600 hover:bg-blue-700 py-3.5 rounded-xl font-semibold transition">Ben Babam</button>
             <button onclick="login('fatih')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl font-semibold transition">Ben Fatih</button>
-        </div>
-    </div>
-
-    <!-- 2. KONTROL PANELİ (Kişi Seçimi) -->
-    <div id="app-screen" class="w-full max-w-sm bg-slate-800 p-6 rounded-2xl shadow-2xl border border-slate-700 hidden">
-        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
-            <div>
-                <p class="text-xs text-slate-400">Profil</p>
-                <h2 id="user-title" class="text-lg font-bold text-emerald-400"></h2>
+            <div class="pt-2 border-t border-slate-700">
+                <button onclick="login('emirhan')" class="w-full bg-amber-600 hover:bg-amber-700 py-3.5 rounded-xl font-bold transition">Ben Emirhan</button>
             </div>
-            <span class="text-xs text-emerald-400 font-medium">Bağlı</span>
         </div>
-        <div id="contact-zone"></div>
     </div>
 
-    <!-- 3. MESAJLAŞMA EKRANI -->
-    <div id="chat-screen" class="w-full max-w-sm bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col h-[500px] hidden">
-        <div class="bg-slate-700 p-4 rounded-t-2xl flex justify-between items-center">
-            <span id="chat-with-title" class="font-bold"></span>
-            <button onclick="backToContacts()" class="text-xs bg-slate-600 px-3 py-1 rounded">Geri</button>
+    <!-- 2. MESAJLAŞMA EKRANI (Doğrudan Emirhan Bağlantısı) -->
+    <div id="chat-screen" class="w-full max-w-sm bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col h-[520px] hidden">
+        
+        <!-- Üst Başlık -->
+        <div class="bg-slate-700 p-4 rounded-t-2xl flex justify-between items-center border-b border-slate-600">
+            <div>
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Aktif Sohbet</p>
+                <h2 id="chat-target-title" class="font-bold text-base text-amber-400">Emirhan</h2>
+            </div>
+            <span id="status-badge" class="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-semibold">Çevrimdışı</span>
         </div>
-        <div id="messages-box" class="flex-1 p-4 overflow-y-auto space-y-2 flex flex-col"></div>
-        <div class="p-3 bg-slate-700 rounded-b-2xl flex gap-2">
-            <input id="message-input" type="text" placeholder="Mesaj yazın..." class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none">
-            <button onclick="sendMessage()" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-sm font-bold">Gönder</button>
+
+        <!-- Mesaj Kutusu -->
+        <div id="messages-box" class="flex-1 p-4 overflow-y-auto space-y-3 flex flex-col bg-slate-900/50">
+            <p class="text-center text-xs text-slate-500 my-2">Bağlantı kurulduğunda mesaj atabilirsiniz.</p>
+        </div>
+
+        <!-- Mesaj Gönderme Alanı -->
+        <div class="p-3 bg-slate-700 rounded-b-2xl flex gap-2 border-t border-slate-600">
+            <input id="message-input" type="text" placeholder="Mesaj yazın..." class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-white">
+            <button onclick="sendMessage()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-xl text-sm transition">Gönder</button>
         </div>
     </div>
 
     <script>
         const ID_MAP = {
-            kardes: "aile-kardes-id-99",
+            emirhan: "aile-emirhan-id-99",
             anne: "aile-anne-id-99",
             baba: "aile-baba-id-99",
             fatih: "aile-fatih-id-99"
@@ -58,7 +59,6 @@
         let peer = null;
         let conn = null;
         let myRole = "";
-        let activeTargetRole = "";
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
@@ -67,67 +67,49 @@
         function login(role) {
             myRole = role;
             document.getElementById("login-screen").classList.add("hidden");
-            document.getElementById("app-screen").classList.remove("hidden");
-            document.getElementById("user-title").innerText = role.toUpperCase();
+            document.getElementById("chat-screen").classList.remove("hidden");
 
             peer = new Peer(ID_MAP[role]);
 
-            // Gelen mesaj bağlantılarını dinle
+            peer.on('open', () => {
+                if (myRole === 'emirhan') {
+                    document.getElementById("chat-target-title").innerText = "Aile Bağlantı Hattı";
+                } else {
+                    document.getElementById("chat-target-title").innerText = "Emirhan";
+                    // Sen, Annem veya Babam girdiğinde otomatik Emirhan'a bağlanmaya çalışır
+                    connectToEmirhan();
+                }
+            });
+
+            // Gelen bağlantıları dinle (Emirhan bağlandığında)
             peer.on('connection', (incomingConn) => {
                 conn = incomingConn;
                 setupConnection();
-                openChatScreen(incomingConn.peer);
             });
-
-            renderDashboard();
         }
 
-        function renderDashboard() {
-            const container = document.getElementById("contact-zone");
-            container.innerHTML = "";
-
-            if (myRole === "kardes") {
-                container.innerHTML = `
-                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">Sohbet Başlat</p>
-                    <div class="space-y-2">
-                        <button onclick="startChat('anne')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Annem ile Mesajlaş</button>
-                        <button onclick="startChat('baba')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Babam ile Mesajlaş</button>
-                        <button onclick="startChat('fatih')" class="w-full bg-slate-700 p-3 rounded-xl font-medium text-left">Fatih ile Mesajlaş</button>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <p class="text-xs font-semibold text-slate-400 uppercase mb-3">İletişim</p>
-                    <button onclick="startChat('kardes')" class="w-full bg-amber-600 hover:bg-amber-700 p-4 rounded-xl font-bold">Kardeşime Mesaj At</button>
-                `;
-            }
-        }
-
-        function startChat(targetRole) {
-            activeTargetRole = targetRole;
-            conn = peer.connect(ID_MAP[targetRole]);
+        function connectToEmirhan() {
+            conn = peer.connect(ID_MAP['emirhan']);
             setupConnection();
-            openChatScreen(ID_MAP[targetRole]);
         }
 
         function setupConnection() {
             conn.on('open', () => {
-                console.log("Bağlantı kuruldu.");
+                const badge = document.getElementById("status-badge");
+                badge.innerText = "Çevrimiçi";
+                badge.className = "text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-semibold";
             });
 
             conn.on('data', (data) => {
-                appendMessage(data.sender, data.text, 'incoming');
+                appendMessage(data.senderName, data.text, 'incoming');
                 playNotificationSound();
             });
-        }
 
-        function openChatScreen(peerId) {
-            document.getElementById("app-screen").classList.add("hidden");
-            document.getElementById("chat-screen").classList.remove("hidden");
-            
-            // İsmi bul
-            let foundRole = Object.keys(ID_MAP).find(key => ID_MAP[key] === peerId) || "Sohbet";
-            document.getElementById("chat-with-title").innerText = foundRole.toUpperCase();
+            conn.on('close', () => {
+                const badge = document.getElementById("status-badge");
+                badge.innerText = "Çevrimdışı";
+                badge.className = "text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-semibold";
+            });
         }
 
         function sendMessage() {
@@ -135,7 +117,9 @@
             const text = input.value.trim();
             if (!text || !conn) return;
 
-            const payload = { sender: myRole, text: text };
+            const senderLabel = myRole.toUpperCase();
+            const payload = { senderName: senderLabel, text: text };
+            
             conn.send(payload);
             appendMessage("Ben", text, 'outgoing');
             input.value = "";
@@ -146,28 +130,24 @@
             const msgDiv = document.createElement("div");
             
             if (type === 'outgoing') {
-                msgDiv.className = "self-end bg-emerald-600 text-white px-3 py-2 rounded-xl text-sm max-w-[80%]";
+                msgDiv.className = "self-end bg-amber-600 text-white px-3.5 py-2 rounded-2xl rounded-tr-none text-sm max-w-[80%] shadow";
+                msgDiv.innerText = text;
             } else {
-                msgDiv.className = "self-start bg-slate-700 text-white px-3 py-2 rounded-xl text-sm max-w-[80%]";
+                msgDiv.className = "self-start bg-slate-700 text-white px-3.5 py-2 rounded-2xl rounded-tl-none text-sm max-w-[80%] shadow";
+                msgDiv.innerHTML = `<span class="text-[10px] block text-amber-400 font-bold mb-0.5">${sender}</span>${text}`;
             }
             
-            msgDiv.innerText = text;
             box.appendChild(msgDiv);
             box.scrollTop = box.scrollHeight;
         }
 
         function playNotificationSound() {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Yeni Mesaj!", {
-                    body: "Bir mesajınız var.",
+                new Notification("Emirhan İletişim", {
+                    body: "Yeni bir mesaj geldi!",
                     icon: "https://cdn-icons-png.flaticon.com/512/3059/3059502.png"
                 });
             }
-        }
-
-        function backToContacts() {
-            document.getElementById("chat-screen").classList.add("hidden");
-            document.getElementById("app-screen").classList.remove("hidden");
         }
     </script>
 </body>
